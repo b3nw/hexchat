@@ -50,11 +50,21 @@ jobs:
           New-Item -Path "c:\gtk-build\python-3.8" -Name "${{ matrix.platform }}" -ItemType "SymbolicLink" -Value "C:/hostedtoolcache/windows/Python/3.8.10/${{ matrix.arch }}"
 
           C:/hostedtoolcache/windows/Python/3.8.10/${{ matrix.arch }}/python.exe -m pip install cffi
+
+          # Discover Python include/libs for MSVC and export to subsequent steps
+          $py = "C:/hostedtoolcache/windows/Python/3.8.10/${{ matrix.arch }}/python.exe"
+          $inc = & $py -c "import sys; print(sys.prefix + '\\\\include')"
+          $lib = & $py -c "import sys; print(sys.prefix + '\\\\libs')"
+          "PYTHON_INCLUDE=$inc" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          "PYTHON_LIB=$lib" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
         shell: powershell
 
       - name: Build
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
+          rem Prepend Python include/lib so MSVC can find Python.h and pythonXY.lib
+          if defined PYTHON_INCLUDE set "INCLUDE=%PYTHON_INCLUDE%;%INCLUDE%"
+          if defined PYTHON_LIB set "LIB=%PYTHON_LIB%;%LIB%"
           msbuild win32\hexchat.sln /m /verbosity:minimal /p:Configuration=Release /p:Platform=${{ matrix.platform }}
         shell: cmd
 
