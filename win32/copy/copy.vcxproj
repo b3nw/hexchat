@@ -64,7 +64,7 @@
     <LuaShare Include="$(DepsRoot)\share\lua\**\*.lua" />
     <LuaShare Include="$(DepsRoot)\share\lua\**\**\*.lua" />
     <Typelib Include="$(DepsRoot)\lib\girepository-1.0\*.typelib" />
-    <None Include="$(Python3Path)\Lib\site-packages\_cffi_backend.*.pyd" />
+    
 
     <Engines Include="$(DepsRoot)\lib\gtk-2.0\i686-pc-vs14\engines\**\*" />
 
