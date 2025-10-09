@@ -4,6 +4,7 @@ doxygen*.tmp
 html/
 *.patch
 tags
+Plan.md
 # Win32 generated files
 plugins/wmpa/wmpa_h.h
 plugins/wmpa/wmpa_i.c
@@ -27,3 +28,7 @@ osx/.HexChat.app
 *.dmg
 *.VC.db
 *.VC.opendb
+# Node modules and package files
+node_modules/
+package-lock.json
+package.json
