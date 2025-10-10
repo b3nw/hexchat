@@ -19,33 +19,21 @@ AppUpdatesURL=http://hexchat.github.io/downloads.html
 LicenseFile=share\doc\hexchat\COPYING
 UninstallDisplayIcon={app}\hexchat.exe
 UninstallDisplayName=HexChat
-#if APPARCH == "x64"
 DefaultDirName={pf64}\HexChat
-#else
-DefaultDirName={pf32}\HexChat
-#endif
 DefaultGroupName=HexChat
 AllowNoIcons=yes
 SolidCompression=yes
 Compression=lzma2/ultra64
 SourceDir=..\rel
 OutputDir=..
-#if APPARCH == "x64"
 OutputBaseFilename={#APPNAM}-{#APPVER}_x64
-#else
-OutputBaseFilename={#APPNAM}-{#APPVER}_x86
-#endif
 FlatComponentsList=no
 PrivilegesRequired=none
 ShowComponentSizes=no
 CreateUninstallRegKey=not IsTaskSelected('portable')
 Uninstallable=not IsTaskSelected('portable')
-#if APPARCH == "x64"
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
-#else
-ArchitecturesAllowed=x86 x64
-#endif
 MinVersion=6.1
 WizardImageFile={#PROJECTDIR}wizardimage.bmp
 WizardSmallImageFile={#PROJECTDIR}wizardsmallimage.bmp
@@ -75,7 +63,7 @@ Name: "plugins\winamp"; Description: "Winamp"; Types: custom; Flags: disablenoun
 Name: "langs"; Description: "Language Interfaces"; Types: custom; Flags: disablenouninstallwarning
 Name: "langs\lua"; Description: "Lua"; Types: normal custom; Flags: disablenouninstallwarning
 Name: "langs\perl"; Description: "Perl (requires Perl 5.20)"; Types: custom; Flags: disablenouninstallwarning
-Name: "langs\python"; Description: "Python (requires Python 3.8)"; Types: custom; Flags: disablenouninstallwarning
+Name: "langs\python"; Description: "Python (requires Python 3.13)"; Types: custom; Flags: disablenouninstallwarning
 
 [Tasks]
 Name: portable; Description: "Yes"; GroupDescription: "Portable Mode: Stores configuration files within install directory for portable drives."; Flags: unchecked
@@ -129,23 +117,13 @@ Source: "gio-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: lib
 Source: "glib-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "gmodule-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "gobject-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
-#if APPARCH == "x64"
 Source: "gspawn-win64-helper.exe"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "gspawn-win64-helper-console.exe"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
-#else
-Source: "gspawn-win32-helper.exe"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
-Source: "gspawn-win32-helper-console.exe"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
-#endif
 Source: "gthread-2.0-0.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "gtk-win32-2.0.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "iconv.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
-#if APPARCH == "x64"
 Source: "libcrypto-1_1-x64.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "libssl-1_1-x64.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
-#else
-Source: "libcrypto-1_1.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
-Source: "libssl-1_1.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
-#endif
 Source: "libenchant.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "ffi-7.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "intl.dll"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
@@ -187,7 +165,7 @@ Source: "plugins\hcperl.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Co
 Source: "python\*.py"; DestDir: "{app}\python"; Flags: ignoreversion; Components: langs\python
 
 Source: "plugins\hcpython3.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Components: langs\python
-Source: "_cffi_backend.cp3*.pyd"; DestDir: "{app}"; Flags: ignoreversion; Components: langs\python
+Source: "_cffi_backend*.pyd"; DestDir: "{app}"; Flags: ignoreversion; Components: langs\python
 
 Source: "hexchat.exe"; DestDir: "{app}"; Flags: ignoreversion; Components: libs
 Source: "hexchat-text.exe"; DestDir: "{app}"; Flags: ignoreversion; Components: xctext
@@ -220,14 +198,7 @@ end;
 /////////////////////////////////////////////////////////////////////
 function GetSysDir(): String;
 begin
-#if APPARCH != "x64"
-	if IsWin64 then
-		Result := ExpandConstant('{syswow64}\')
-	else
-		Result := ExpandConstant('{sys}\');
-#else
 	Result := ExpandConstant('{sys}\');
-#endif
 end;
 
 /////////////////////////////////////////////////////////////////////
@@ -294,17 +265,10 @@ begin
 	if not IsTaskSelected('portable') then
 	begin
 
-#if APPARCH == "x64"
 		REDIST := 'https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/vcredist_2015_x64.exe';
 		REDIST_2013 := 'https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/vcredist_2013_x64.exe';
 		PERL := 'https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/Perl.5.20.0.x64.msi';
-		PY3 := 'https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe';
-#else
-		REDIST := 'https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/vcredist_2015_x86.exe';
-		REDIST_2013 := 'https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/vcredist_2013_x86.exe';
-		PERL := 'https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/Perl.5.20.0.x86.msi';
-		PY3 := 'https://www.python.org/ftp/python/3.8.10/python-3.8.10.exe';
-#endif
+		PY3 := 'https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe';
 		DOTNET := 'https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/dotnet_40.exe';
 		SPELL := 'https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/HexChat.Spelling.Dictionaries.r2.exe';
 
@@ -327,7 +291,7 @@ begin
 				idpAddFile(PERL, ExpandConstant('{tmp}\perl.msi'))
 			end;
 
-			if IsComponentSelected('langs\python\python3') and not CheckDLL('python38.dll') then
+			if IsComponentSelected('langs\python\python3') and not CheckDLL('python313.dll') then
 				idpAddFile(PY3, ExpandConstant('{tmp}\python.exe'));
 		end;
 	end;
@@ -341,11 +305,7 @@ function NextButtonClick(CurPageID: Integer): Boolean;
 begin
 	if (CurPageID = wpSelectTasks) then
 		if (WizardForm.TasksList.Checked[1] = True) then
-#if APPARCH == "x64"
 			if (WizardDirValue() = ExpandConstant('{pf64}\HexChat')) then
-#else
-			if (WizardDirValue() = ExpandConstant('{pf32}\HexChat')) then
-#endif
 			begin
 				WizardForm.TasksList.Checked[1] := False
 				MsgBox('Portable mode is only intended for use on portable drives and has been disabled.', mbInformation, MB_OK)
@@ -362,11 +322,7 @@ var
 	sUnInstPath: String;
 	sUnInstallString: String;
 begin
-#if APPARCH == "x64"
 	sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\HexChat (x64)_is1');
-#else
-	sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\HexChat (x86)_is1');
-#endif
 	sUnInstallString := '';
 	if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
 		RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);

@@ -27,18 +27,15 @@
     <TargetName>$(Python3Output)</TargetName>
     <OutDir>$(HexChatRel)plugins\</OutDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PYTHON_EXPORTS;$(OwnFlags);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(Glib);$(Python3Path)\include;..\..\src\common;$(HexChatLib);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(Glib);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <ModuleDefinitionFile>python.def</ModuleDefinitionFile>
-      <AdditionalDependencies>"$(Python3Lib).lib";$(DepLibs);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(DepsRoot)\lib;$(Python3Path)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DepsRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>"$(Python3Path)\python.exe" generate_plugin.py ..\..\src\common\hexchat-plugin.h python.py "$(IntDir)python.c"</Command>
+      <Command>python generate_plugin.py ..\..\src\common\hexchat-plugin.h python.py "$(IntDir)python.c"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -52,7 +49,7 @@
       <AdditionalLibraryDirectories>$(DepsRoot)\lib;$(Python3Path)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>"$(Python3Path)\python.exe" generate_plugin.py ..\..\src\common\hexchat-plugin.h python.py "$(IntDir)python.c"</Command>
+      <Command>python generate_plugin.py ..\..\src\common\hexchat-plugin.h python.py "$(IntDir)python.c"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -67,4 +64,5 @@
     <ClCompile Include="$(IntDir)python.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+
 </Project>

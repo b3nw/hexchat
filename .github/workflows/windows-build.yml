@@ -3,26 +3,33 @@ on:
   push:
     branches:
       - master
+      - feat/hexchat-python-313-win
   pull_request:
-    branches:
+    branches:  
       - master
+  workflow_dispatch:
 
 jobs:
   windows_build:
-    runs-on: windows-2019
+    runs-on: windows-2022
     strategy:
       matrix:
-        platform: [x64, win32]
-        arch: [x64, x86]
-        exclude:
-          - platform: x64
-            arch: x86
-          - platform: win32
-            arch: x64
+        platform: [x64]
+        arch: [x64]
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: ${{ matrix.arch }}
+
+      - name: Set Python3Path environment variable
+        run: echo "Python3Path=$(python -c 'import sys; import os; print(os.path.normpath(sys.prefix))')" >> $env:GITHUB_ENV
+        shell: powershell
 
       - name: Install Dependencies
         run: |
@@ -34,42 +41,72 @@ jobs:
           Invoke-WebRequest https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/idpsetup-1.5.1.exe -OutFile deps\idpsetup.exe
           & deps\idpsetup.exe /VERYSILENT
 
-          Invoke-WebRequest https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/gtk-${{ matrix.platform }}-2018-08-29-openssl1.1.7z -OutFile deps\gtk-${{ matrix.arch }}.7z
-          & 7z.exe x deps\gtk-${{ matrix.arch }}.7z -oC:\gtk-build\gtk
+          # Use platform consistently for GTK download filename so OutFile matches URL
+          $gtkFile = "deps\gtk-${{ matrix.platform }}.7z"
+          Invoke-WebRequest https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/gtk-${{ matrix.platform }}-2018-08-29-openssl1.1.7z -OutFile $gtkFile
 
+          $sevenZip = Join-Path $env:ProgramFiles '7-Zip\7z.exe'
+          if (-not (Test-Path $sevenZip)) { $sevenZip = '7z.exe' }
+
+          & $sevenZip x $gtkFile -oC:\gtk-build\gtk
+
+          # gendef
           Invoke-WebRequest https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/gendef-20111031.7z -OutFile deps\gendef.7z
-          & 7z.exe x deps\gendef.7z -oC:\gtk-build
+          & $sevenZip x deps\gendef.7z -oC:\gtk-build
 
+          # WinSparkle
           Invoke-WebRequest https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/WinSparkle-20151011.7z -OutFile deps\WinSparkle.7z
-          & 7z.exe x deps\WinSparkle.7z -oC:\gtk-build\WinSparkle
+          & $sevenZip x deps\WinSparkle.7z -oC:\gtk-build\WinSparkle
 
+          # perl per-arch
           Invoke-WebRequest https://github.com/hexchat/gvsbuild/releases/download/hexchat-2.16.2/perl-5.20.0-${{ matrix.arch }}.7z -OutFile deps\perl-${{ matrix.arch }}.7z
-          & 7z.exe x deps\perl-${{ matrix.arch }}.7z -oC:\gtk-build\perl-5.20\${{ matrix.platform }}
+          & $sevenZip x deps\perl-${{ matrix.arch }}.7z -oC:\gtk-build\perl-5.20\${{ matrix.platform }}
 
-          New-Item -Path "c:\gtk-build" -Name "python-3.8" -ItemType "Directory"
-          New-Item -Path "c:\gtk-build\python-3.8" -Name "${{ matrix.platform }}" -ItemType "SymbolicLink" -Value "C:/hostedtoolcache/windows/Python/3.8.10/${{ matrix.arch }}"
-
-          C:/hostedtoolcache/windows/Python/3.8.10/${{ matrix.arch }}/python.exe -m pip install cffi
+          # Install cffi for Python 3.13
+          python -m pip install --upgrade pip
+          python -m pip install cffi
         shell: powershell
 
-      - name: Build
+      - name: Install .NET Framework 4.6.1 Developer Pack
+        run: choco install netfx-4.6.1-devpack -y
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Show Python paths (debug)
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
-          msbuild win32\hexchat.sln /m /verbosity:minimal /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+          echo Python executable: %PYTHON% || where python
+          python -c "import sys, sysconfig, os; print('sys.prefix=', sys.prefix); p=sysconfig.get_paths(); print('Include:', p.get('include')); print('Platlib:', p.get('platlib')); print(os.path.exists(os.path.join(p.get('include'), 'Python.h')))"
         shell: cmd
 
+      - name: Build
+        run: msbuild win32\hexchat.sln /m /verbosity:minimal /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:Python3Path="%Python3Path%"
+        shell: cmd
+
+      - name: List build output
+        run: dir /s /b
+        shell: cmd
+
+      
       - name: Preparing Artifacts
         run: |
-          move ..\hexchat-build\${{ matrix.platform }}\HexChat*.exe .\
+          if exist ..\hexchat-build\${{ matrix.platform }}\HexChat*.exe (
+            move ..\hexchat-build\${{ matrix.platform }}\HexChat*.exe .\
+          ) else (
+            echo "Expected installer not found in ..\hexchat-build\${{ matrix.platform }}"
+            dir ..\hexchat-build /s
+            exit /b 1
+          )
           move ..\hexchat-build .\
         shell: cmd
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: Installer ${{ matrix.arch }}
           path: HexChat*.exe
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: Build Files ${{ matrix.arch  }}
+          name: Build Files ${{ matrix.arch }}
           path: hexchat-build
+
