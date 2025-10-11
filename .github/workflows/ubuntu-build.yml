@@ -22,7 +22,7 @@ jobs:
           python3 --version
 
       - name: Configure
-        run: meson build -Dtext=true -Dtheme-manager=true -Dauto_features=enabled
+        run: meson build -Dtext-frontend=true -Dtheme-manager=true -Dauto_features=enabled
 
       - name: Build
         run: ninja -C build
