@@ -4,8 +4,9 @@ on:
     branches:
       - master
       - feat/hexchat-python-313-win
+      - fix/workflow-builds
   pull_request:
-    branches:  
+    branches:
       - master
   workflow_dispatch:
 

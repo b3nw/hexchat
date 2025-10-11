@@ -3,22 +3,24 @@ on:
   push:
     branches:
       - master
+      - fix/workflow-builds
   pull_request:
     branches:
       - master
 
 jobs:
   msys2_build:
-    runs-on: windows-latest
+    runs-on: windows-2022
     defaults:
       run:
         shell: msys2 {0}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - uses: msys2/setup-msys2@v2
         with:
+          update: true
           install: >-
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-pkg-config
@@ -28,6 +30,16 @@ jobs:
             mingw-w64-x86_64-gtk-update-icon-cache
             mingw-w64-x86_64-luajit
             mingw-w64-x86_64-desktop-file-utils
+
+      - name: Show environment (debug)
+        run: |
+          echo "MSYSTEM: $MSYSTEM"
+          echo "PATH: $PATH"
+          which gcc
+          which meson
+          gcc --version
+          meson --version
+          pkg-config --version
 
       - name: Configure
         run: >-

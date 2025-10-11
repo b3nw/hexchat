@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - fix/workflow-builds
   pull_request:
     branches:
       - master
@@ -11,14 +12,15 @@ jobs:
   flatpak_build:
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:gnome-40
+      image: bilelmoussaoui/flatpak-github-actions:gnome-45
       options: --privileged
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v3
+    - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v5
       with:
         bundle: hexchat.flatpak
         manifest-path: flatpak/io.github.Hexchat.json
+        cache-key: flatpak-builder-${{ runner.os }}
