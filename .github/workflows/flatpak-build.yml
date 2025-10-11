@@ -31,33 +31,17 @@ jobs:
         # Prefer https for 0pointer.de to avoid HTTP/port80 failures
         grep -RIl "0pointer.de" flatpak/shared-modules || true | xargs -r sed -i 's|http://0pointer.de/|https://0pointer.de/|g'
 
-    - name: Build flatpak with retries
+    - name: Build flatpak
       run: |
-        set -euo pipefail
-        max_attempts=3
-        attempt=1
-        while [ $attempt -le $max_attempts ]; do
-          echo "Attempt $attempt/$max_attempts"
-          if xvfb-run --auto-servernum flatpak-builder \
-             --repo=repo \
-             --disable-rofiles-fuse \
-             --install-deps-from=flathub \
-             --force-clean \
-             --default-branch=stable \
-             --arch=x86_64 \
-             --ccache flatpak_app \
-             flatpak/io.github.Hexchat.json; then
-            echo "flatpak-builder succeeded"
-            break
-          fi
-          echo "flatpak-builder attempt $attempt failed"
-          attempt=$((attempt+1))
-          if [ $attempt -gt $max_attempts ]; then
-            echo "All attempts failed"
-            exit 1
-          fi
-          sleep $((attempt * 10))
-        done
+        xvfb-run --auto-servernum flatpak-builder \
+          --repo=repo \
+          --disable-rofiles-fuse \
+          --install-deps-from=flathub \
+          --force-clean \
+          --default-branch=stable \
+          --arch=x86_64 \
+          --ccache flatpak_app \
+          flatpak/io.github.Hexchat.json
 
     - name: Create Flatpak bundle
       run: |

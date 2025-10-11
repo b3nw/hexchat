@@ -34,9 +34,24 @@
     "shared-modules/lua5.3/lua-5.3.5.json",
     {
       "name": "libcanberra",
-      "buildsystem": "meson",
+      "cleanup": [
+        "*.la",
+        "/bin",
+        "/etc",
+        "/include",
+        "/libexec",
+        "/share/gtk-doc",
+        "/share/man"
+      ],
       "config-opts": [
-        "--buildtype=release"
+        "--disable-static",
+        "--disable-gtk-doc",
+        "--disable-oss",
+        "--enable-pulse",
+        "--disable-udev",
+        "--disable-gtk",
+        "--enable-gtk3",
+        "--disable-lynx"
       ],
       "sources": [
         {
