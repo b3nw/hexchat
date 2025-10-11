@@ -32,7 +32,20 @@
     "shared-modules/gtk2/gtk2-common-themes.json",
     "shared-modules/dbus-glib/dbus-glib.json",
     "shared-modules/lua5.3/lua-5.3.5.json",
-    "shared-modules/libcanberra/libcanberra.json",
+    {
+      "name": "libcanberra",
+      "buildsystem": "meson",
+      "config-opts": [
+        "--buildtype=release"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://launchpad.net/ubuntu/+source/libcanberra/0.30-17ubuntu2/+download/libcanberra-0.30.tar.xz",
+          "sha256": "ae7da6220d7720fc327ceeed54b57b306812ee598b39c6609641178c48dee742"
+        }
+      ]
+    },
     "python3-cffi.json",
     {
       "name": "lgi",
