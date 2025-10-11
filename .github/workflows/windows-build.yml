@@ -22,6 +22,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install ccache
+        uses: jwlawson/actions-setup-ccache@v2
+        with:
+          version: 'latest'
+          upgrade: true
+
+      - name: Cache ccache directory
+        uses: actions/cache@v4
+        with:
+          path: C:\Users\runneradmin\.ccache
+          key: ${{ runner.os }}-windows-ccache-${{ hashFiles('**/*.c', '**/*.h', '**/*.cpp', '**/*.vcxproj', '**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-windows-ccache-
+
+      - name: Setup ccache
+        run: |
+          ccache --set-config=max_size=1.0G
+          ccache --zero-stats
+          echo "CCACHE_PATH=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\*\bin\Hostx64\x64" >> $env:GITHUB_ENV
+        shell: powershell
+
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
@@ -81,8 +102,13 @@ jobs:
         shell: cmd
 
       - name: Build
-        run: msbuild win32\hexchat.sln /m /verbosity:minimal /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:Python3Path="%Python3Path%"
+        run: |
+          set CL= /clr
+          msbuild win32\hexchat.sln /m /verbosity:minimal /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:Python3Path="%Python3Path%" /p:UseClangCl=true
         shell: cmd
+
+      - name: Show ccache statistics
+        run: ccache --show-stats
 
       - name: List build output
         run: dir /s /b

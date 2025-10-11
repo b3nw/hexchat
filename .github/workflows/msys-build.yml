@@ -34,6 +34,22 @@ jobs:
             mingw-w64-x86_64-python-pip
             mingw-w64-x86_64-python-cffi
             mingw-w64-x86_64-gettext
+            mingw-w64-x86_64-ccache
+
+      - name: Cache ccache directory
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-msys2-ccache-${{ hashFiles('**/*.c', '**/*.h', '**/*.cpp', 'meson.build', 'meson_options.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-msys2-ccache-
+
+      - name: Setup ccache
+        shell: msys2 {0}
+        run: |
+          echo "/mingw64/lib/ccache/bin" >> $GITHUB_PATH
+          ccache --set-config=max_size='1.0G'
+          ccache --zero-stats
 
       - name: Show environment (debug)
         run: |
@@ -66,6 +82,9 @@ jobs:
 
       - name: Test
         run: ninja -C build test
+
+      - name: Show ccache statistics
+        run: ccache --show-stats
 
       - name: Install
         run: ninja -C build install
