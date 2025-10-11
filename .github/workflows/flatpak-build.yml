@@ -46,7 +46,7 @@ jobs:
              --default-branch=stable \
              --arch=x86_64 \
              --ccache flatpak_app \
-             flatpak/flatpak-github-action-modified-io.github.Hexchat.json; then
+             flatpak/io.github.Hexchat.json; then
             echo "flatpak-builder succeeded"
             break
           fi
@@ -58,3 +58,7 @@ jobs:
           fi
           sleep $((attempt * 10))
         done
+
+    - name: Create Flatpak bundle
+      run: |
+        flatpak build-bundle repo hexchat.flatpak io.github.Hexchat
