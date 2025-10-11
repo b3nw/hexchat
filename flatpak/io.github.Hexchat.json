@@ -41,8 +41,8 @@
       "sources": [
         {
           "type": "archive",
-          "url": "https://launchpad.net/ubuntu/+source/libcanberra/0.30-17ubuntu2/+download/libcanberra-0.30.tar.xz",
-          "sha256": "ae7da6220d7720fc327ceeed54b57b306812ee598b39c6609641178c48dee742"
+          "url": "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/libcanberra/0.30-10ubuntu10/libcanberra_0.30.orig.tar.xz",
+          "sha256": "c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72"
         }
       ]
     },
