@@ -33,6 +33,7 @@ jobs:
             mingw-w64-x86_64-python
             mingw-w64-x86_64-python-pip
             mingw-w64-x86_64-python-cffi
+            mingw-w64-x86_64-gettext
 
       - name: Show environment (debug)
         run: |
@@ -43,6 +44,9 @@ jobs:
           gcc --version
           meson --version
           pkg-config --version
+
+      - name: Set GETTEXTDATADIRS
+        run: echo "GETTEXTDATADIRS=/usr/share/gettext/its" >> $GITHUB_ENV
 
       - name: Install Python cffi
         run: pip install cffi --break-system-packages
