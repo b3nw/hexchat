@@ -21,6 +21,12 @@ jobs:
         submodules: recursive
         token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Fix JSON parse error in lua-5.3.5.json
+      run: |
+        # Replace literal tab characters with \t escape
+        sed -i 's/|LUA_IDSIZE.*60/|LUA_IDSIZE\\t60/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
+        sed -i 's/|LUA_IDSIZE.*512/|LUA_IDSIZE\\t512/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
+
     - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v5
       with:
         bundle: hexchat.flatpak
