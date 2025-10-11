@@ -31,7 +31,6 @@
     "shared-modules/gtk2/gtk2.json",
     "shared-modules/gtk2/gtk2-common-themes.json",
     "shared-modules/dbus-glib/dbus-glib.json",
-    "shared-modules/lua5.3/lua-5.3.5.json",
     {
       "name": "libcanberra",
       "cleanup": [
@@ -80,7 +79,7 @@
         "--buildtype=release",
         "-Ddbus-service-use-appid=true",
         "-Dwith-perl=false",
-        "-Dwith-lua=lua"
+        "-Dwith-lua=true"
       ],
       "build-options": {
         "cflags": "-Wno-error=missing-include-dirs"
