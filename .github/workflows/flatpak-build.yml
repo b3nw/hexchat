@@ -18,14 +18,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: recursive
+        submodules: false
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Fix JSON parse error in lua-5.3.5.json
+    - name: Clone and fix shared-modules
       run: |
-        # Replace literal tab characters with \t escape
-        sed -i 's/|LUA_IDSIZE.*60/|LUA_IDSIZE\\t60/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
-        sed -i 's/|LUA_IDSIZE.*512/|LUA_IDSIZE\\t512/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
+        # Clone shared-modules manually
+        git clone https://github.com/flathub/shared-modules.git flatpak/shared-modules
+        # Fix the JSON parse error in lua-5.3.5.json
+        sed -i 's/|LUA_IDSIZE\t60/|LUA_IDSIZE\\t60/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
+        sed -i 's/|LUA_IDSIZE\t512/|LUA_IDSIZE\\t512/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
 
     - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v5
       with:
