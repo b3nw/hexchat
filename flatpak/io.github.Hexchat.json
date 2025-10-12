@@ -61,9 +61,13 @@
       ]
     },
     "python3-cffi.json",
+    "shared-modules/lua5.1/lua-5.1.5.json",
     {
       "name": "lgi",
       "buildsystem": "meson",
+      "config-opts": [
+        "-Dlua-pc=lua51"
+      ],
       "sources": [
         {
           "type": "git",

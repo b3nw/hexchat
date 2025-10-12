@@ -41,6 +41,8 @@ jobs:
         # Fix the JSON parse error in lua-5.3.5.json
         sed -i 's/|LUA_IDSIZE\t60/|LUA_IDSIZE\\t60/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
         sed -i 's/|LUA_IDSIZE\t512/|LUA_IDSIZE\\t512/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
+        # Fix lua5.1 module: keep pkg-config files for lgi dependency
+        sed -i 's|"/lib/pkgconfig",||g' flatpak/shared-modules/lua5.1/lua-5.1.5.json
         # Prefer https for 0pointer.de to avoid HTTP/port80 failures
         grep -RIl "0pointer.de" flatpak/shared-modules || true | xargs -r sed -i 's|http://0pointer.de/|https://0pointer.de/|g'
 
