@@ -63,4 +63,4 @@ jobs:
 
     - name: Create Flatpak bundle
       run: |
-        flatpak build-bundle repo hexchat.flatpak io.github.Hexchat
+        flatpak build-bundle repo hexchat.flatpak io.github.Hexchat --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
