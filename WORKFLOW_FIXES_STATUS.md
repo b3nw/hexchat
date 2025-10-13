@@ -435,17 +435,26 @@ MSYS2:  Cacheable calls: 79/81 (97.53%), Hits: 3/79 (3.80%)
 
 ### Flatpak Build Lua Dependency Fix ✅
 
-**Issue**: Missing Lua dependency for lgi module build
-**Errors**: `Run-time dependency lua5.1 found: NO`, `Run-time dependency lua51 found: NO`, `Run-time dependency luajit found: NO`
-**Root Cause**: lgi module couldn't find Lua pkg-config files in Flatpak environment
-**Solution**: Added lua-5.1 shared-module and configured lgi with `-Dlua-pc=lua51`
+**Issue**: Missing Lua dependency for lgi module build and incorrect Lua configuration
+**Errors**:
+1. First attempt: `Run-time dependency lua5.1 found: NO`, `Run-time dependency lua51 found: NO`, `Run-time dependency luajit found: NO`
+2. Second attempt: `Dependency "true" not found` (Meson received "true" as Lua dependency name)
+**Root Cause**:
+1. lgi module couldn't find Lua pkg-config files in Flatpak environment
+2. Flatpak hexchat configuration was passing `-Dwith-lua=true` instead of proper pkg-config name
+**Solution**:
+1. Added lua-5.1 shared-module and configured lgi with `-Dlua-pc=lua51`
+2. Fixed hexchat configuration to use `-Dwith-lua=lua51` instead of `-Dwith-lua=true`
 **Changes Made**:
 1. Added `"shared-modules/lua5.1/lua-5.1.5.json"` to modules array
 2. Added `"config-opts": ["-Dlua-pc=lua51"]` to lgi module configuration
-**Result**: Flatpak build now has required Lua dependency for lgi module
+3. Fixed lua5.1 shared-module cleanup to preserve pkg-config files: removed `"/lib/pkgconfig",` line
+4. Changed hexchat config from `"-Dwith-lua=true"` to `"-Dwith-lua=lua51"`
+**Result**: Flatpak build now has proper Lua dependency configuration for both lgi module and hexchat Lua plugin
 
 **Files Modified**:
 - `flatpak/io.github.Hexchat.json` - Added Lua 5.1 dependency and lgi configuration
+- `.github/workflows/flatpak-build.yml` - Added sed command to preserve Lua pkg-config files
 
 ## Conclusion
 
