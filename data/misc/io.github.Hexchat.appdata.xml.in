@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop-application">
+<component type="desktop-application" xmlns:its="http://www.w3.org/2005/11/its">
+  <its:rules version="2.0">
+    <its:translateRule selector="//name" translate="yes"/>
+    <its:translateRule selector="//summary" translate="yes"/>
+    <its:translateRule selector="//description//p" translate="yes"/>
+    <its:translateRule selector="//description//li" translate="yes"/>
+    <its:translateRule selector="//releases//description//p" translate="yes"/>
+    <its:translateRule selector="//releases//description//li" translate="yes"/>
+    <its:translateRule selector="//screenshots//caption" translate="yes"/>
+  </its:rules>
   <id>io.github.Hexchat</id>
   <name>HexChat</name>
   <launchable type="desktop-id">io.github.Hexchat.desktop</launchable>

@@ -2,7 +2,7 @@
   "app-id": "io.github.Hexchat",
   "branch": "stable",
   "runtime": "org.gnome.Platform",
-  "runtime-version": "40",
+  "runtime-version": "45",
   "sdk": "org.gnome.Sdk",
   "command": "hexchat",
   "finish-args": [
@@ -31,12 +31,43 @@
     "shared-modules/gtk2/gtk2.json",
     "shared-modules/gtk2/gtk2-common-themes.json",
     "shared-modules/dbus-glib/dbus-glib.json",
-    "shared-modules/lua5.3/lua-5.3.5.json",
-    "shared-modules/libcanberra/libcanberra.json",
+    {
+      "name": "libcanberra",
+      "cleanup": [
+        "*.la",
+        "/bin",
+        "/etc",
+        "/include",
+        "/libexec",
+        "/share/gtk-doc",
+        "/share/man"
+      ],
+      "config-opts": [
+        "--disable-static",
+        "--disable-gtk-doc",
+        "--disable-oss",
+        "--enable-pulse",
+        "--disable-udev",
+        "--disable-gtk",
+        "--enable-gtk3",
+        "--disable-lynx"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/libcanberra/0.30-10ubuntu10/libcanberra_0.30.orig.tar.xz",
+          "sha256": "c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72"
+        }
+      ]
+    },
     "python3-cffi.json",
+    "shared-modules/lua5.1/lua-5.1.5.json",
     {
       "name": "lgi",
       "buildsystem": "meson",
+      "config-opts": [
+        "-Dlua-pc=lua51"
+      ],
       "sources": [
         {
           "type": "git",
@@ -52,7 +83,7 @@
         "--buildtype=release",
         "-Ddbus-service-use-appid=true",
         "-Dwith-perl=false",
-        "-Dwith-lua=lua"
+        "-Dwith-lua=lua51"
       ],
       "build-options": {
         "cflags": "-Wno-error=missing-include-dirs"

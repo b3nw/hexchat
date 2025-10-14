@@ -3,22 +3,68 @@ on:
   push:
     branches:
       - master
+      - fix/workflow-builds
   pull_request:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
   flatpak_build:
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:gnome-40
+      image: bilelmoussaoui/flatpak-github-actions:gnome-45
       options: --privileged
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: false
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v3
+    - name: Cache flatpak-builder ccache
+      uses: actions/cache@v4
       with:
-        bundle: hexchat.flatpak
-        manifest-path: flatpak/io.github.Hexchat.json
+        path: .flatpak-builder/ccache
+        key: ${{ runner.os }}-flatpak-ccache-${{ hashFiles('**/*.c', '**/*.h', '**/*.cpp', 'meson.build', 'meson_options.txt', 'flatpak/**/*.json') }}
+        restore-keys: |
+          ${{ runner.os }}-flatpak-ccache-
+
+    - name: Clone and fix shared-modules
+      run: |
+        # Clone shared-modules manually
+        git clone https://github.com/flathub/shared-modules.git flatpak/shared-modules
+        # Fix the JSON parse error in lua-5.3.5.json
+        sed -i 's/|LUA_IDSIZE\t60/|LUA_IDSIZE\\t60/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
+        sed -i 's/|LUA_IDSIZE\t512/|LUA_IDSIZE\\t512/g' flatpak/shared-modules/lua5.3/lua-5.3.5.json
+        # Fix lua5.1 module: keep pkg-config files for lgi dependency
+        sed -i 's|"/lib/pkgconfig",||g' flatpak/shared-modules/lua5.1/lua-5.1.5.json
+        # Prefer https for 0pointer.de to avoid HTTP/port80 failures
+        grep -RIl "0pointer.de" flatpak/shared-modules || true | xargs -r sed -i 's|http://0pointer.de/|https://0pointer.de/|g'
+
+    - name: Build flatpak
+      run: |
+        xvfb-run --auto-servernum flatpak-builder \
+          --repo=repo \
+          --disable-rofiles-fuse \
+          --install-deps-from=flathub \
+          --force-clean \
+          --default-branch=stable \
+          --arch=x86_64 \
+          --ccache flatpak_app \
+          flatpak/io.github.Hexchat.json
+
+    - name: Show ccache statistics
+      run: |
+        if [ -d .flatpak-builder/ccache ]; then
+          echo "=== Flatpak-builder ccache directory contents ==="
+          du -sh .flatpak-builder/ccache
+          echo "Total cached files: $(find .flatpak-builder/ccache -type f | wc -l)"
+        else
+          echo "Warning: ccache directory not found at .flatpak-builder/ccache"
+          echo "Checking alternative locations:"
+          find . -type d -name ccache 2>/dev/null || echo "No ccache directories found"
+        fi
+
+    - name: Create Flatpak bundle
+      run: |
+        flatpak build-bundle repo hexchat.flatpak io.github.Hexchat stable --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
