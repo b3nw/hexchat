@@ -59,7 +59,15 @@ jobs:
           flatpak/io.github.Hexchat.json
 
     - name: Show ccache statistics
-      run: ccache --show-stats
+      run: |
+        if [ -d flatpak_app/.flatpak-builder/ccache ]; then
+          echo "=== Flatpak-builder ccache directory contents ==="
+          du -sh flatpak_app/.flatpak-builder/ccache
+          find flatpak_app/.flatpak-builder/ccache -type f | wc -l
+          echo "Total cached files: $(find flatpak_app/.flatpak-builder/ccache -type f | wc -l)"
+        else
+          echo "Warning: ccache directory not found"
+        fi
 
     - name: Create Flatpak bundle
       run: |
