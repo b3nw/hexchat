@@ -21,18 +21,13 @@ jobs:
         submodules: false
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Cache ccache directory
+    - name: Cache flatpak-builder ccache
       uses: actions/cache@v4
       with:
-        path: ~/.ccache
+        path: .flatpak-builder/ccache
         key: ${{ runner.os }}-flatpak-ccache-${{ hashFiles('**/*.c', '**/*.h', '**/*.cpp', 'meson.build', 'meson_options.txt', 'flatpak/**/*.json') }}
         restore-keys: |
           ${{ runner.os }}-flatpak-ccache-
-
-    - name: Setup ccache
-      run: |
-        ccache --set-config=max_size='1.0G'
-        ccache --zero-stats
 
     - name: Clone and fix shared-modules
       run: |
@@ -60,13 +55,14 @@ jobs:
 
     - name: Show ccache statistics
       run: |
-        if [ -d flatpak_app/.flatpak-builder/ccache ]; then
+        if [ -d .flatpak-builder/ccache ]; then
           echo "=== Flatpak-builder ccache directory contents ==="
-          du -sh flatpak_app/.flatpak-builder/ccache
-          find flatpak_app/.flatpak-builder/ccache -type f | wc -l
-          echo "Total cached files: $(find flatpak_app/.flatpak-builder/ccache -type f | wc -l)"
+          du -sh .flatpak-builder/ccache
+          echo "Total cached files: $(find .flatpak-builder/ccache -type f | wc -l)"
         else
-          echo "Warning: ccache directory not found"
+          echo "Warning: ccache directory not found at .flatpak-builder/ccache"
+          echo "Checking alternative locations:"
+          find . -type d -name ccache 2>/dev/null || echo "No ccache directories found"
         fi
 
     - name: Create Flatpak bundle
