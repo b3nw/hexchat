@@ -68,3 +68,8 @@ jobs:
     - name: Create Flatpak bundle
       run: |
         flatpak build-bundle repo hexchat.flatpak io.github.Hexchat stable --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Flatpak Bundle
+        path: hexchat.flatpak

@@ -48,8 +48,19 @@ jobs:
       - name: Test
         run: ninja -C build test
 
+      - name: Create tar.gz artifact
+        run: |
+          mkdir -p hexchat-ubuntu-build
+          DESTDIR=hexchat-ubuntu-build ninja -C build install
+          tar -czf hexchat-2.16.3-ubuntu.tar.gz -C hexchat-ubuntu-build .
+
       - name: Show ccache statistics
         run: ccache --show-stats
 
       - name: Install
         run: sudo ninja -C build install
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ubuntu Tarball
+          path: hexchat-2.16.3-ubuntu.tar.gz
